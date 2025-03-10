@@ -1,7 +1,7 @@
 import connection from "../connection.js";
 import { RandomNum } from "../utilities/functions.js";
 import { upload, formattingSlug } from "../utilities/functions.js";
-import slugify from "slugify";
+
 
 function index(req, res) {
     let { search, category, minRooms, minBeds, page } = req.query;
@@ -61,12 +61,14 @@ function index(req, res) {
 
 function indexMostLovedHomePage(req, res) {
 
+    const limit = 5;
+
     const sql = `SELECT apartments.* 
     FROM apartments 
     ORDER BY likes DESC
-    LIMIT 5`;
+    LIMIT ?`;
 
-    connection.query(sql, (err, results) => {
+    connection.query(sql, [limit], (err, results) => {
         if (err) return res.status(500).json({ error: 'Errore del server', details: err });
         console.log(results[0])
 
@@ -82,12 +84,14 @@ function indexMostLovedHomePage(req, res) {
 }
 function indexMostVisitedCityHomePage(req, res) {
 
+    const limit = 10;
+
     const sql = `WITH city_counts AS (
     SELECT city, COUNT(*) AS city_count
     FROM apartments
     GROUP BY city
     ORDER BY city_count DESC
-    LIMIT 10
+    LIMIT ?
 )
 SELECT a.*, c.city_count
 FROM apartments a
@@ -99,7 +103,7 @@ WHERE a.id IN (
     GROUP BY city
 );`;
 
-    connection.query(sql, (err, results) => {
+    connection.query(sql, [limit], (err, results) => {
         if (err) return res.status(500).json({ error: 'Errore del server', details: err });
         console.log(results[0])
 
@@ -115,13 +119,15 @@ WHERE a.id IN (
 }
 
 function indexLastTimeChanceHomePage(req, res) {
+
+    const limit = 6;
     const sql = `
         SELECT * FROM apartments
         ORDER BY RAND()
-        LIMIT 6;
+        LIMIT ?;
     `;
 
-    connection.query(sql, (err, results) => {
+    connection.query(sql, [limit], (err, results) => {
         if (err) return res.status(500).json({ error: 'Errore del server', details: err });
 
         res.json({
@@ -197,6 +203,7 @@ function show(req, res) {
             let response = {
                 status: "success",
                 item
+
             }
 
             const sqlReviewLenght = "SELECT * FROM `reviews` WHERE `apartment_slug` = ?";
@@ -453,4 +460,4 @@ function modify(req, res) {
     })
 }
 
-export { index, indexCategories, indexMostLovedHomePage, indexMostVisitedCityHomePage, indexLastTimeChanceHomePage, indexCategoriesHomePage,show, storereviews, store, upload, modify };
+export { index, indexCategories, indexMostLovedHomePage, indexMostVisitedCityHomePage, indexLastTimeChanceHomePage, indexCategoriesHomePage, show, storereviews, store, upload, modify };
