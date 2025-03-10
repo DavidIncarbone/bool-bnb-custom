@@ -1,5 +1,6 @@
 import express from "express";
 
+
 // Other imports
 import errorsHandler from "./middlewares/errorsHandler.js";
 import notFound from "./middlewares/notFound.js";
